@@ -77,7 +77,7 @@ def main(args):
     n_classes = 1
     learning_rate = 2e-4
 
-    efficientnet_b = 1
+    efficientnet_b = 0
     cv_folds = 5
 
     seed_everything(RND_STATE + sid)
@@ -110,11 +110,11 @@ def main(args):
     X_2015_test = IMG_PATH_2015_TEST + "/" + X_2015_test + ".jpg"
     y_2015_test = df_train_2015_test.level.values.astype(np.float32)
 
-    df_messidor = pd.read_csv(DF_PATH_MESSIDOR)
-    df_messidor = df_messidor[df_messidor.adjudicated_dr_grade > -1]
-    X_messidor = df_messidor.image.values
-    X_messidor = IMG_PATH_MESSIDOR + "/" + X_messidor + ".jpg"
-    y_messidor = df_messidor.adjudicated_dr_grade.values.astype(np.float32)
+    # df_messidor = pd.read_csv(DF_PATH_MESSIDOR)
+    # df_messidor = df_messidor[df_messidor.adjudicated_dr_grade > -1]
+    # X_messidor = df_messidor.image.values
+    # X_messidor = IMG_PATH_MESSIDOR + "/" + X_messidor + ".jpg"
+    # y_messidor = df_messidor.adjudicated_dr_grade.values.astype(np.float32)
 
     normalize = [[0.43823998, 0.29557559, 0.20054542],
                  [0.27235733, 0.19562355, 0.16674458]]
@@ -151,13 +151,13 @@ def main(args):
 
         X_train = np.concatenate([
             X_aptos_train,
-            X_messidor,
+            # X_messidor,
             X_2015_train,
             X_2015_test,
         ])
         y_train = np.concatenate([
             y_aptos_train,
-            y_messidor,
+            # y_messidor,
             y_2015_train,
             y_2015_test,
         ])
@@ -175,7 +175,7 @@ def main(args):
             files=X_train,
             labels=y_train,
             transform=transform_train,
-            buffer_size=10000,  # lower this value if out-of-memory is thrown <<<<<<<<<<<<<<<<<<<<
+            buffer_size=100,  # lower this value if out-of-memory is thrown <<<<<<<<<<<<<<<<<<<<
             image_size=IMG_SIZE)
 
         dataset_valid = ImageDataset(
@@ -235,7 +235,8 @@ def main(args):
                              pretrained=True,
                              progress=False)
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        print("device ? : ", device)
         model.to(device)
         optimizer = optim.Adam(model.parameters(),
                                lr=learning_rate,

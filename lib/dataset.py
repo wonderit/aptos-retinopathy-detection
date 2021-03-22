@@ -98,7 +98,7 @@ class ImageDataset(Dataset):
             files = self.files[:self.buffer_size]
         else:
             files = self.files
-        self.buffer = Parallel(n_jobs=cpu_count(),
+        self.buffer = Parallel(backend='multiprocessing', n_jobs=cpu_count(),
                                verbose=False)(delayed(load_image)(file,
                                                                   self.image_size,
                                                                   self.size_is_min) for file in files)
